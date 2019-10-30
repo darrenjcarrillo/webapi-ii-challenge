@@ -46,24 +46,25 @@ router.post("/", (req, res) => {
 
 // ******* COMMENTS ******* //
 
-// 2. GET COMMENTS
+// 2. POST COMMENTS by id
 
 router.post("/:id/comments", (req, res) => {
-  const { id } = req.params;
+  // const { id } = req.params;
+  const comment = req.body;
 
-  if ((!id, req.body)) {
+  if (!comment.post_id) {
     res.status(404).json({
       message: "The post with the specified ID does not exist."
     });
-  } else if (!req.body.text) {
+  } else if (!comment.text) {
     res.status(400).json({
       errorMessage: "Please provide text for the comment."
     });
   } else {
-    Comments.insert(req.body)
+    Posts.insertComment(comment)
       .then(comments => {
         console.log(`Comment Posted`, comments);
-        res.status.json(comments);
+        res.status(201).json(comments);
       })
       .catch(error => {
         console.log(error);
@@ -124,5 +125,28 @@ router.delete("/:id", (req, res) => {
 });
 
 // #7
+router.put(`/:id`, (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    res
+      .status(404)
+      .json({ message: "The post with the specified ID does not exist." });
+  } else if (!req.body.title || !req.body.contents) {
+    res.status(400).json({
+      errorMessage: "Please provide title and contents for the post."
+    });
+  } else {
+    Posts.update(id, req.body)
+      .then(updatePost => {
+        console.log(updatePost);
+        res.status(200).json(updatePost);
+      })
+      .catch(err => {
+        res
+          .status(500)
+          .json({ error: "The post information could not be modified." });
+      });
+  }
+});
 
 module.exports = router;
